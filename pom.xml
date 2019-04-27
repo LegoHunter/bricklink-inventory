@@ -11,7 +11,7 @@
 	<groupId>com.vattima.bricklink</groupId>
 	<artifactId>bricklink-inventory</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Bricklink Inventory Synchronizer</name>
+	<name>Bricklink :: Inventory Synchronizer</name>
 	<description>Bricklink Inventory Management</description>
 
 	<properties>
