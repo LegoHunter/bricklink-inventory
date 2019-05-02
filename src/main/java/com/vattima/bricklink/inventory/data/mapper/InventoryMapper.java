@@ -68,6 +68,6 @@ public class InventoryMapper {
         bricklinkInventory.setTierQuantity3(inventory.getTier_quantity3());
         bricklinkInventory.setTierPrice3(inventory.getTier_price3());
         bricklinkInventory.setMyWeight(inventory.getMy_weight());
-        bricklinkInventory.setDateCreated(Optional.ofNullable(inventory.getDate_created()).orElse(bricklinkInventory.getDateCreated()));
+        bricklinkInventory.setDateCreated(Optional.ofNullable(inventory.getDate_created()).orElseGet(bricklinkInventory::getDateCreated));
     };
 }
