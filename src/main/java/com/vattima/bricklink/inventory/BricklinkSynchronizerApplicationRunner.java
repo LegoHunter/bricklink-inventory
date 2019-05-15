@@ -4,12 +4,10 @@ import com.vattima.bricklink.inventory.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bricklink.data.lego.dao.BricklinkInventoryDao;
-import net.bricklink.data.lego.dto.BricklinkInventory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 @Slf4j
 @RequiredArgsConstructor
 public class BricklinkSynchronizerApplicationRunner implements ApplicationRunner {
