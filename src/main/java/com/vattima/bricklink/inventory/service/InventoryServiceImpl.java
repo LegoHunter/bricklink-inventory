@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-//@Component
+@Component
 @Slf4j
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements InventoryService {

@@ -46,7 +46,7 @@ public class BricklinkPriceCrawler {
     }
 
     private Stream<BricklinkInventory> inventoryItems() {
-        return bricklinkInventoryDao.getInventoryWork()
+        return bricklinkInventoryDao.getInventoryWork(true)
                                     .parallelStream()
                                     .filter(BricklinkInventory::shouldSynchronize);
     }
