@@ -56,11 +56,11 @@ public class SaleItemDescriptionBuilderTest {
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
-        bricklinkInventory.setBoxConditionCode("M");
+        bricklinkInventory.setBoxConditionId(1);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Box: Mint");
 
-        bricklinkInventory.setBoxConditionCode("E");
+        bricklinkInventory.setBoxConditionId(2);
         description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Box: Excellent");
     }
@@ -72,7 +72,7 @@ public class SaleItemDescriptionBuilderTest {
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
         bricklinkInventory.setSealed(true);
-        bricklinkInventory.setBoxConditionCode("E");
+        bricklinkInventory.setBoxConditionId(2);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Box: Excellent");
         assertThat(description).contains("Sealed");
@@ -86,8 +86,8 @@ public class SaleItemDescriptionBuilderTest {
         bricklinkInventory.setUuid(uuid);
         bricklinkInventory.setExtraDescription("This is an awesome set!");
         bricklinkInventory.setSealed(true);
-        bricklinkInventory.setBoxConditionCode("E");
-        bricklinkInventory.setInstructionsConditionCode("M");
+        bricklinkInventory.setBoxConditionId(2);
+        bricklinkInventory.setInstructionsConditionId(1);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("This is an awesome set!");
         assertThat(description).contains("Box: Excellent");
@@ -100,19 +100,19 @@ public class SaleItemDescriptionBuilderTest {
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
-        bricklinkInventory.setInstructionsConditionCode("M");
+        bricklinkInventory.setInstructionsConditionId(1);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Instructions: Mint");
 
-        bricklinkInventory.setInstructionsConditionCode("MS");
+        bricklinkInventory.setInstructionsConditionId(8);
         description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Instructions: Missing");
 
-        bricklinkInventory.setInstructionsConditionCode("CC");
+        bricklinkInventory.setInstructionsConditionId(9);
         description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Instructions: Color Copy");
 
-        bricklinkInventory.setInstructionsConditionCode("BW");
+        bricklinkInventory.setInstructionsConditionId(10);
         description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Instructions: Black & White Copy");
     }
@@ -123,8 +123,8 @@ public class SaleItemDescriptionBuilderTest {
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
-        bricklinkInventory.setBoxConditionCode("E");
-        bricklinkInventory.setInstructionsConditionCode("VG");
+        bricklinkInventory.setBoxConditionId(2);
+        bricklinkInventory.setInstructionsConditionId(3);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Box: Excellent");
         assertThat(description).contains("Instructions: Very Good");
@@ -133,14 +133,14 @@ public class SaleItemDescriptionBuilderTest {
     @Test
     public void conditionDecoder_returnsCondition_forKnownValue() {
         ConditionDecoder conditionDecoder = new ConditionDecoder();
-        Optional<String> condition = conditionDecoder.decode("M");
+        Optional<String> condition = conditionDecoder.decode(1);
         assertThat(condition).isPresent().get().isEqualTo("Mint");
     }
 
     @Test
     public void conditionDecoder_returnsNotPresent_forUnknownValue() {
         ConditionDecoder conditionDecoder = new ConditionDecoder();
-        Optional<String> condition = conditionDecoder.decode("XX");
+        Optional<String> condition = conditionDecoder.decode(99);
         assertThat(condition).isNotPresent();
     }
 

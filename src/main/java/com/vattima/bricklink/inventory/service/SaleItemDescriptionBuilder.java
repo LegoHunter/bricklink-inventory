@@ -26,7 +26,7 @@ public class SaleItemDescriptionBuilder {
         Optional.ofNullable(bricklinkInventory.getExtraDescription()).ifPresent(description::append);
 
         // Box
-        conditionDecoder.decode(bricklinkInventory.getBoxConditionCode()).ifPresent(c -> {
+        conditionDecoder.decode(bricklinkInventory.getBoxConditionId()).ifPresent(c -> {
             append(description, String.format("Box: %s", c));
         });
 
@@ -36,7 +36,7 @@ public class SaleItemDescriptionBuilder {
         }
 
         // Instructions
-        conditionDecoder.decode(bricklinkInventory.getInstructionsConditionCode()).ifPresent(c -> {
+        conditionDecoder.decode(bricklinkInventory.getInstructionsConditionId()).ifPresent(c -> {
             append(description, String.format("Instructions: %s", c));
         });
 
@@ -47,6 +47,7 @@ public class SaleItemDescriptionBuilder {
         });
 
         log.info("Description [{}]", description.toString());
+        bricklinkInventory.setDescription(description.toString());
         return description.toString();
     }
 
@@ -69,24 +70,24 @@ public class SaleItemDescriptionBuilder {
     }
 
     static class ConditionDecoder {
-        private Map<String, String> conditionDescriptions = new HashMap<>();
+        private Map<Integer, String> conditionDescriptions = new HashMap<>();
 
         public ConditionDecoder() {
-            conditionDescriptions.put("M", "Mint");
-            conditionDescriptions.put("E", "Excellent");
-            conditionDescriptions.put("VG", "Very Good");
-            conditionDescriptions.put("G", "Good");
-            conditionDescriptions.put("P", "Poor");
-            conditionDescriptions.put("NA", "Not Applicable");
-            conditionDescriptions.put("F", "Fair");
-            conditionDescriptions.put("MS", "Missing");
-            conditionDescriptions.put("CC", "Color Copy");
-            conditionDescriptions.put("BW", "Black & White Copy");
-            conditionDescriptions.put("SL", "Sealed");
+            conditionDescriptions.put(1, "Mint");
+            conditionDescriptions.put(2, "Excellent");
+            conditionDescriptions.put(3, "Very Good");
+            conditionDescriptions.put(4, "Good");
+            conditionDescriptions.put(5, "Poor");
+            conditionDescriptions.put(6, "Not Applicable");
+            conditionDescriptions.put(7, "Fair");
+            conditionDescriptions.put(8, "Missing");
+            conditionDescriptions.put(9, "Color Copy");
+            conditionDescriptions.put(10, "Black & White Copy");
+            conditionDescriptions.put(11, "Sealed");
         }
 
-        public Optional<String> decode(String conditionCode) {
-            return Optional.ofNullable(conditionDescriptions.get(conditionCode));
+        public Optional<String> decode(Integer conditionId) {
+            return Optional.ofNullable(conditionDescriptions.get(conditionId));
         }
     }
 }
