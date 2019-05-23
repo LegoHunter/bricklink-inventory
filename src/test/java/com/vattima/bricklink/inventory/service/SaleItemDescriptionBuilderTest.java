@@ -17,6 +17,7 @@ import java.util.stream.IntStream;
 
 import static com.vattima.bricklink.inventory.service.SaleItemDescriptionBuilder.ConditionDecoder;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.mock;
 public class SaleItemDescriptionBuilderTest {
 
     private String uuid;
+    private String blItemNumber;
     private String shortUrl;
     private AlbumManager albumManager;
     private AlbumManifest albumManifest;
@@ -31,23 +33,24 @@ public class SaleItemDescriptionBuilderTest {
     @Before
     public void setup() {
         uuid = "234851bc94cf3b875dfd91db73a76524";
+        blItemNumber = "6658-1";
         shortUrl = "http://bit.ly/2EdZ3z6";
-        albumManifest = albumManifest(shortUrl, 5);
-        albumManager = mockAlbumManager(uuid, albumManifest);
+        albumManifest = albumManifest(uuid, blItemNumber, shortUrl, 5);
+        albumManager = mockAlbumManager(uuid, blItemNumber, albumManifest);
     }
 
     @Test
     public void buildDescription_returnsNonNull() {
-        albumManifest = albumManifest();
-        albumManager = mockAlbumManager(uuid, albumManifest);
+        albumManager = mockAlbumManager(uuid, blItemNumber, albumManifest);
 
         SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
+        bricklinkInventory.setBlItemNo(blItemNumber);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
 
-        assertThat(description).isEmpty();
+        assertThat(description).isNotEmpty().contains(shortUrl).contains("("+albumManifest.getPhotos().size()+") Photos");
     }
 
     @Test
@@ -56,6 +59,7 @@ public class SaleItemDescriptionBuilderTest {
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
+        bricklinkInventory.setBlItemNo(blItemNumber);
         bricklinkInventory.setBoxConditionId(1);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Box: Mint");
@@ -71,6 +75,7 @@ public class SaleItemDescriptionBuilderTest {
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
+        bricklinkInventory.setBlItemNo(blItemNumber);
         bricklinkInventory.setSealed(true);
         bricklinkInventory.setBoxConditionId(2);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
@@ -84,6 +89,7 @@ public class SaleItemDescriptionBuilderTest {
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
+        bricklinkInventory.setBlItemNo(blItemNumber);
         bricklinkInventory.setExtraDescription("This is an awesome set!");
         bricklinkInventory.setSealed(true);
         bricklinkInventory.setBoxConditionId(2);
@@ -100,6 +106,7 @@ public class SaleItemDescriptionBuilderTest {
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
+        bricklinkInventory.setBlItemNo(blItemNumber);
         bricklinkInventory.setInstructionsConditionId(1);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
         assertThat(description).contains("Instructions: Mint");
@@ -123,6 +130,7 @@ public class SaleItemDescriptionBuilderTest {
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
         bricklinkInventory.setUuid(uuid);
+        bricklinkInventory.setBlItemNo(blItemNumber);
         bricklinkInventory.setBoxConditionId(2);
         bricklinkInventory.setInstructionsConditionId(3);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
@@ -148,23 +156,25 @@ public class SaleItemDescriptionBuilderTest {
         return null;
     }
 
-    private AlbumManifest albumManifest(String shortUrl, int photos) {
+    private AlbumManifest albumManifest(String uuid, String blItemNumber, String shortUrl, int photos) {
         AlbumManifest albumManifest = new AlbumManifest();
+        albumManifest.setUuid(uuid);
+        albumManifest.setBlItemNumber(blItemNumber);
         try {
             albumManifest.setShortUrl(new URL(shortUrl));
             List<PhotoMetaData> photosList = albumManifest.getPhotos();
             IntStream.range(0, photos)
-                     .forEach(i -> photosList.add(new PhotoMetaData(Paths.get("./" + i + ".jpg"))));
+                    .forEach(i -> photosList.add(new PhotoMetaData(Paths.get("./" + i + ".jpg"))));
             return albumManifest;
         } catch (MalformedURLException e) {
             throw new BricklinkInventoryException(e);
         }
     }
 
-    private AlbumManager mockAlbumManager(String uuid, AlbumManifest albumManifest) {
+    private AlbumManager mockAlbumManager(String uuid, String blItemNumber, AlbumManifest albumManifest) {
         AlbumManager albumManager = mock(AlbumManager.class);
-        doReturn(Optional.ofNullable(albumManifest)).when(albumManager)
-                                                    .getAlbumManifest(eq(uuid));
+        doReturn(albumManifest).when(albumManager)
+                .getAlbumManifest(eq(uuid), eq(blItemNumber));
         return albumManager;
     }
 }

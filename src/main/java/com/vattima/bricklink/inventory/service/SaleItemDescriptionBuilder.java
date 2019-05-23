@@ -5,6 +5,7 @@ import com.vattima.lego.imaging.service.AlbumManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bricklink.data.lego.dto.BricklinkInventory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -41,14 +42,18 @@ public class SaleItemDescriptionBuilder {
         });
 
         // Album Manifest
-        Optional<AlbumManifest> albumManifest = albumManager.getAlbumManifest(bricklinkInventory.getUuid());
-        albumManifest.ifPresent(a -> {
-            appendWithNewLine(description, shortUrlLinkBuilder(a));
-        });
+        AlbumManifest albumManifest = albumManager.getAlbumManifest(bricklinkInventory.getUuid(), bricklinkInventory.getBlItemNo());
+        if (hasShortUrl(albumManifest)) {
+                appendWithNewLine(description, shortUrlLinkBuilder(albumManifest));
+        }
 
         log.info("Description [{}]", description.toString());
         bricklinkInventory.setDescription(description.toString());
         return description.toString();
+    }
+
+    public boolean hasShortUrl(final AlbumManifest albumManifest) {
+        return Optional.ofNullable(albumManifest).map(AlbumManifest::getShortUrl).isPresent();
     }
 
     public String shortUrlLinkBuilder(final AlbumManifest albumManifest) {
