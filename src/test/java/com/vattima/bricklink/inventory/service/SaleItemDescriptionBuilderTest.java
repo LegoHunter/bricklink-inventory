@@ -125,6 +125,23 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
+    public void buildDescription_withNoPhotos_containsMessageToContactMe() {
+        final String uuid = "455a2f76a89dcf372ac56fced641b5e5";
+        final String blItemNumber = "6604-1";
+        final AlbumManifest albumManifest = albumManifest(uuid, blItemNumber);
+        albumManager = mockAlbumManager(uuid, blItemNumber, albumManifest);
+
+        SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
+
+        BricklinkInventory bricklinkInventory = new BricklinkInventory();
+        bricklinkInventory.setUuid(uuid);
+        bricklinkInventory.setBlItemNo(blItemNumber);
+        bricklinkInventory.setInstructionsConditionId(1);
+        String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
+        assertThat(description).contains("Instructions: Mint").contains("Contact me for photos!").doesNotContain("[<a href=").doesNotContain(") Photos</a>]");
+    }
+
+    @Test
     public void buildDescription_withBoxAndInstructionsConditionCode_containsBoxAndInstructionsDescription() {
         SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
 
@@ -169,6 +186,13 @@ public class SaleItemDescriptionBuilderTest {
         } catch (MalformedURLException e) {
             throw new BricklinkInventoryException(e);
         }
+    }
+
+    private AlbumManifest albumManifest(String uuid, String blItemNumber) {
+        AlbumManifest albumManifest = new AlbumManifest();
+        albumManifest.setUuid(uuid);
+        albumManifest.setBlItemNumber(blItemNumber);
+        return albumManifest;
     }
 
     private AlbumManager mockAlbumManager(String uuid, String blItemNumber, AlbumManifest albumManifest) {

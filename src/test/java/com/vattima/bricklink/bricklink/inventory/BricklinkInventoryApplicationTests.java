@@ -1,4 +1,4 @@
-package com.vattima.bricklink.bricklinkinventory;
+package com.vattima.bricklink.bricklink.inventory;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

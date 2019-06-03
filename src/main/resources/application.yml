@@ -28,6 +28,10 @@ bricklink:
    web:
       client-config-dir: C:\Users\tvatt\.credentials\bricklink
       client-config-file: bricklink-web.json
+      pool:
+         default-max-per-route: 20
+         max-per-route: 20
+         max-total: 50
 
 lego:
    sheet:

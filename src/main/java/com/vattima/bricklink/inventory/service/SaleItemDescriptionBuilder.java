@@ -45,6 +45,8 @@ public class SaleItemDescriptionBuilder {
         AlbumManifest albumManifest = albumManager.getAlbumManifest(bricklinkInventory.getUuid(), bricklinkInventory.getBlItemNo());
         if (hasShortUrl(albumManifest)) {
                 appendWithNewLine(description, shortUrlLinkBuilder(albumManifest));
+        } else {
+            appendWithNewLine(description, "Contact me for photos!");
         }
 
         log.info("Description [{}]", description.toString());
