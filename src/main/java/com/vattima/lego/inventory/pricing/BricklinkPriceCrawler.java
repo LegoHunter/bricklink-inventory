@@ -4,6 +4,7 @@ import com.bricklink.api.ajax.BricklinkAjaxClient;
 import com.bricklink.api.ajax.model.v1.ItemForSale;
 import com.bricklink.api.ajax.support.CatalogItemsForSaleResult;
 import com.bricklink.api.rest.client.BricklinkRestClient;
+import com.bricklink.api.rest.client.ParamsBuilder;
 import com.bricklink.api.rest.model.v1.PriceGuide;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -111,19 +114,6 @@ public class BricklinkPriceCrawler {
                                         pg.getMax_price());
                             })
                             .collect(Collectors.toList());
-    }
-
-    private static class ParamsBuilder {
-        private Map<String, Object> params = new HashMap<>();
-
-        public ParamsBuilder of(String key, Object value) {
-            params.put(key, value);
-            return this;
-        }
-
-        public Map<String, Object> get() {
-            return params;
-        }
     }
 
     @Setter
