@@ -50,7 +50,7 @@ public class SaleItemDescriptionBuilderTest {
         bricklinkInventory.setBlItemNo(blItemNumber);
         String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
 
-        assertThat(description).isNotEmpty().contains(shortUrl).contains("("+albumManifest.getPhotos().size()+") Photos");
+        assertThat(description).isNotEmpty().contains(shortUrl).contains("(" + albumManifest.getPhotos().size() + ") Photos");
     }
 
     @Test
