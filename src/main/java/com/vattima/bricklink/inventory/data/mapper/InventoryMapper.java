@@ -21,7 +21,7 @@ public class InventoryMapper {
         inventory.setItem(item);
         inventory.setColor_id(Optional.ofNullable(bricklinkInventory.getColorId()).orElse(0));
         inventory.setColor_name(bricklinkInventory.getColorName());
-        inventory.setQuantity(bricklinkInventory.getQuantity());
+        inventory.setQuantity(bricklinkInventory.getQuantity() - inventory.getQuantity());
         inventory.setNew_or_used(bricklinkInventory.getNewOrUsed());
         inventory.setCompleteness(bricklinkInventory.getCompleteness());
         inventory.setUnit_price(bricklinkInventory.getUnitPrice());

@@ -20,31 +20,35 @@ import java.util.Optional;
 public class InventoryServiceImpl implements InventoryService {
     private final BricklinkInventoryDao bricklinkInventoryDao;
     private final BricklinkRestClient bricklinkRestClient;
-    private final BricklinkAjaxClient bricklinkAjaxClient;
 
     @Override
     public SynchronizeResult synchronize(BricklinkInventory bricklinkInventory) {
-        SynchronizeResult result = new SynchronizeResult();
+        SynchronizeResult result = null;
         log.info("Synchronizing Bricklink Inventory [{}]", bricklinkInventory);
         if (bricklinkInventory.shouldSynchronize()) {
             Optional<Long> blInventoryId = Optional.ofNullable(bricklinkInventory.getInventoryId());
             if (blInventoryId.isPresent()) {
                 // If inventory_id is not null, bricklinkInventory must be updated in Bricklink
                 BricklinkResource<Inventory> inventoryResponse = bricklinkRestClient.getInventories(blInventoryId.get());
-                Inventory inventory = inventoryResponse.getData();
-                InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
-                bricklinkRestClient.updateInventory(blInventoryId.get(), inventory);
-                bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
+                result = SynchronizeResult.build(inventoryResponse);
+                if (result.isSuccess()) {
+                    Inventory inventory = result.getInventory();
+                    InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
+                    bricklinkRestClient.updateInventory(blInventoryId.get(), inventory);
+                    bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
+                }
             } else {
                 // If inventory_id is null, bricklinkInventory does not exist in Bricklink
                 Inventory inventory = new Inventory();
                 InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
                 BricklinkResource<Inventory> inventoryResponse = bricklinkRestClient.createInventory(inventory);
-                log.info("Create Inventory Response [{}]", inventoryResponse);
-                inventory = inventoryResponse.getData();
-                InventoryMapper.mapInventoryToBricklinkInventory.accept(inventory, bricklinkInventory);
-                bricklinkInventoryDao.update(bricklinkInventory);
-                bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
+                result = SynchronizeResult.build(inventoryResponse);
+                if (result.isSuccess()) {
+                    inventory = result.getInventory();
+                    InventoryMapper.mapInventoryToBricklinkInventory.accept(inventory, bricklinkInventory);
+                    bricklinkInventoryDao.update(bricklinkInventory);
+                    bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
+                }
             }
         } else {
             log.info("Synchronization not needed");
