@@ -27,7 +27,7 @@ public class InventoryMapper {
         inventory.setUnit_price(bricklinkInventory.getUnitPrice());
         inventory.setBind_id(bricklinkInventory.getBindId());
         inventory.setDescription(bricklinkInventory.getDescription());
-        inventory.setRemarks(bricklinkInventory.getRemarks());
+        inventory.setRemarks(bricklinkInventory.getUuid() + Optional.ofNullable(bricklinkInventory.getInternalComments()).map(ic -> "; " + ic).orElse(""));
         inventory.setBulk(bricklinkInventory.getBulk());
         inventory.setIs_retain(bricklinkInventory.getIsRetain());
         inventory.setIs_stock_room(bricklinkInventory.getIsStockRoom());
