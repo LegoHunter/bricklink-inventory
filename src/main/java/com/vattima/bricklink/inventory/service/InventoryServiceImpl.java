@@ -2,8 +2,12 @@ package com.vattima.bricklink.inventory.service;
 
 import com.bricklink.api.ajax.BricklinkAjaxClient;
 import com.bricklink.api.rest.client.BricklinkRestClient;
+import com.bricklink.api.rest.exception.BricklinkClientException;
 import com.bricklink.api.rest.model.v1.BricklinkResource;
 import com.bricklink.api.rest.model.v1.Inventory;
+import com.bricklink.api.rest.model.v1.Order;
+import com.bricklink.api.rest.model.v1.OrderItem;
+import com.vattima.bricklink.inventory.BricklinkInventoryException;
 import com.vattima.bricklink.inventory.data.mapper.InventoryMapper;
 import com.vattima.bricklink.inventory.support.SynchronizeResult;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +16,7 @@ import net.bricklink.data.lego.dao.BricklinkInventoryDao;
 import net.bricklink.data.lego.dto.BricklinkInventory;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -24,8 +29,8 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public SynchronizeResult synchronize(BricklinkInventory bricklinkInventory) {
         SynchronizeResult result = null;
-        log.info("Synchronizing Bricklink Inventory [{}]", bricklinkInventory);
         if (bricklinkInventory.shouldSynchronize()) {
+            log.info("Synchronizing Bricklink Inventory [{}]", bricklinkInventory);
             Optional<Long> blInventoryId = Optional.ofNullable(bricklinkInventory.getInventoryId());
             if (blInventoryId.isPresent()) {
                 // If inventory_id is not null, bricklinkInventory must be updated in Bricklink
@@ -33,6 +38,7 @@ public class InventoryServiceImpl implements InventoryService {
                 result = SynchronizeResult.build(inventoryResponse);
                 if (result.isSuccess()) {
                     Inventory inventory = result.getInventory();
+                    bricklinkInventoryDao.update(bricklinkInventory);
                     InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
                     bricklinkRestClient.updateInventory(blInventoryId.get(), inventory);
                     bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
@@ -54,5 +60,32 @@ public class InventoryServiceImpl implements InventoryService {
             log.info("Synchronization not needed");
         }
         return result;
+    }
+
+    @Override
+    public void updateInventoryItemsOnOrder(final String orderId) {
+        // Retrieve order from Bricklink
+        BricklinkResource<Order> bricklinkOrder = bricklinkRestClient.getOrder(orderId);
+
+        // If not found, throw Exception
+        Order order = Optional.ofNullable(bricklinkOrder.getData()).orElseThrow(() -> new BricklinkInventoryException(String.format("Order Id [%1$s] was not found", orderId)));
+
+        // Get all OrderItem Batches
+        BricklinkResource<List<List<OrderItem>>> orderItemBatches = bricklinkRestClient.getOrderItems(orderId);
+
+        // For each OrderItemBatch
+        orderItemBatches.getData().forEach(oib -> {
+            //    For each OrderItem
+            oib.forEach(oi -> {
+                //       find bricklink inventory by inventory id
+                Optional<BricklinkInventory> bricklinkInventory = bricklinkInventoryDao.getByInventoryId(oi.getInventory_id());
+                bricklinkInventory.ifPresent(bi -> {
+                    //       update database Bricklink Inventory item with the order id
+                    bricklinkInventoryDao.updateOrder(bi.getBlInventoryId(), orderId);
+                    //       log the update
+                    log.info("Updated BricklinkInventory [{}] with Order Id [{}]", bi, orderId);
+                });
+            });
+        });
     }
 }

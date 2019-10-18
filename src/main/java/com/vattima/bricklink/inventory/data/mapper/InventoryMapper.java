@@ -21,13 +21,15 @@ public class InventoryMapper {
         inventory.setItem(item);
         inventory.setColor_id(Optional.ofNullable(bricklinkInventory.getColorId()).orElse(0));
         inventory.setColor_name(bricklinkInventory.getColorName());
-        inventory.setQuantity(bricklinkInventory.getQuantity() - inventory.getQuantity());
+        inventory.setQuantity(bricklinkInventory.getQuantity() - Optional.ofNullable(inventory.getQuantity()).orElse(0));
         inventory.setNew_or_used(bricklinkInventory.getNewOrUsed());
-        inventory.setCompleteness(bricklinkInventory.getCompleteness());
+        if (bricklinkInventory.getItemType().equals("SET")) {
+            inventory.setCompleteness(bricklinkInventory.getCompleteness());
+        }
         inventory.setUnit_price(bricklinkInventory.getUnitPrice());
         inventory.setBind_id(bricklinkInventory.getBindId());
         inventory.setDescription(bricklinkInventory.getDescription());
-        inventory.setRemarks(bricklinkInventory.getUuid() + Optional.ofNullable(bricklinkInventory.getInternalComments()).map(ic -> "; " + ic).orElse(""));
+        inventory.setRemarks(bricklinkInventory.getRemarks());
         inventory.setBulk(bricklinkInventory.getBulk());
         inventory.setIs_retain(bricklinkInventory.getIsRetain());
         inventory.setIs_stock_room(bricklinkInventory.getIsStockRoom());
@@ -50,7 +52,9 @@ public class InventoryMapper {
         bricklinkInventory.setColorName(inventory.getColor_name());
         bricklinkInventory.setQuantity(inventory.getQuantity());
         bricklinkInventory.setNewOrUsed(inventory.getNew_or_used());
-        bricklinkInventory.setCompleteness(inventory.getCompleteness());
+        if (bricklinkInventory.getItemType().equals("SET")) {
+            bricklinkInventory.setCompleteness(inventory.getCompleteness());
+        }
         bricklinkInventory.setUnitPrice(inventory.getUnit_price());
         bricklinkInventory.setBindId(inventory.getBind_id());
         bricklinkInventory.setDescription(inventory.getDescription());
