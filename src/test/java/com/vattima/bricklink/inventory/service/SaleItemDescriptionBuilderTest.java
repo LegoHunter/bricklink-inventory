@@ -1,15 +1,22 @@
 package com.vattima.bricklink.inventory.service;
 
 import com.vattima.bricklink.inventory.BricklinkInventoryException;
+import com.vattima.lego.imaging.config.LegoImagingProperties;
 import com.vattima.lego.imaging.model.AlbumManifest;
 import com.vattima.lego.imaging.model.PhotoMetaData;
 import com.vattima.lego.imaging.service.AlbumManager;
+import com.vattima.lego.imaging.service.flickr.AlbumManagerImpl;
+import com.vattima.lego.imaging.service.flickr.ImageManagerImpl;
+import com.vattima.lego.imaging.util.PathUtils;
+import lombok.extern.slf4j.Slf4j;
+import net.bricklink.data.lego.dao.BricklinkInventoryDao;
 import net.bricklink.data.lego.dto.BricklinkInventory;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
@@ -17,11 +24,11 @@ import java.util.stream.IntStream;
 
 import static com.vattima.bricklink.inventory.service.SaleItemDescriptionBuilder.ConditionDecoder;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+@Slf4j
 public class SaleItemDescriptionBuilderTest {
 
     private String uuid;
@@ -29,6 +36,7 @@ public class SaleItemDescriptionBuilderTest {
     private String shortUrl;
     private AlbumManager albumManager;
     private AlbumManifest albumManifest;
+    private LegoImagingProperties legoImagingProperties;
 
     @Before
     public void setup() {
@@ -37,6 +45,73 @@ public class SaleItemDescriptionBuilderTest {
         shortUrl = "http://bit.ly/2EdZ3z6";
         albumManifest = albumManifest(uuid, blItemNumber, shortUrl, 5);
         albumManager = mockAlbumManager(uuid, blItemNumber, albumManifest);
+        legoImagingProperties = new LegoImagingProperties();
+        legoImagingProperties.setKeywordsKeyName("Keywords:");
+    }
+
+    @Test
+    public void photosWithRemarks_buildsDescriptionWithExtraDescriptions() throws Exception {
+        Path jpgPath = PathUtils.fromClasspath("actual-lego-photos-with-keywords-and-remarks/6603-1-c93848ddb00ec2d6f20cfafd0eea46ef");
+        legoImagingProperties.setRootImagesFolder(jpgPath.toFile()
+                                                         .getAbsolutePath());
+        jpgPath.forEach(p -> {
+            log.info("p=[{}]", p);
+        });
+        BricklinkInventory bricklinkInventory = new BricklinkInventory();
+        bricklinkInventory.setBlItemNo("6603-1");
+        bricklinkInventory.setUuid("c93848ddb00ec2d6f20cfafd0eea46ef");
+        bricklinkInventory.setBoxConditionId(2);
+        bricklinkInventory.setInstructionsConditionId(2);
+        bricklinkInventory.setSealed(false);
+        BricklinkInventoryDao bricklinkInventoryDao = mock(BricklinkInventoryDao.class);
+        doReturn(bricklinkInventory).when(bricklinkInventoryDao)
+                                    .getByUuid("c93848ddb00ec2d6f20cfafd0eea46ef");
+        AlbumManager localAlbumManager = new AlbumManagerImpl(new ImageManagerImpl(), legoImagingProperties, bricklinkInventoryDao);
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0704.JPG")));
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0705.JPG")));
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0706.JPG")));
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0707.JPG")));
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0708.JPG")));
+
+        SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(localAlbumManager);
+        String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
+        assertThat(description).isNotEmpty()
+                               .contains("This is caption #1.")
+                               .contains("This is caption #2.")
+                               .contains("This is caption #3.")
+                               .contains("This is caption #4.")
+                               .contains("This is caption #5.");
+
+    }
+
+    @Test
+    public void photosWithSomeRemarks_buildsDescriptionWithExtraDescriptions() throws Exception {
+        Path jpgPath = PathUtils.fromClasspath("actual-lego-photos-with-keywords-and-some-remarks/6603-1-c93848ddb00ec2d6f20cfafd0eea46ef");
+        legoImagingProperties.setRootImagesFolder(jpgPath.toFile()
+                                                         .getAbsolutePath());
+        jpgPath.forEach(p -> {
+            log.info("p=[{}]", p);
+        });
+        BricklinkInventory bricklinkInventory = new BricklinkInventory();
+        bricklinkInventory.setBlItemNo("6603-1");
+        bricklinkInventory.setUuid("c93848ddb00ec2d6f20cfafd0eea46ef");
+        bricklinkInventory.setBoxConditionId(2);
+        bricklinkInventory.setInstructionsConditionId(2);
+        bricklinkInventory.setSealed(false);
+        BricklinkInventoryDao bricklinkInventoryDao = mock(BricklinkInventoryDao.class);
+        doReturn(bricklinkInventory).when(bricklinkInventoryDao)
+                                    .getByUuid("c93848ddb00ec2d6f20cfafd0eea46ef");
+        AlbumManager localAlbumManager = new AlbumManagerImpl(new ImageManagerImpl(), legoImagingProperties, bricklinkInventoryDao);
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0704.JPG")));
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0705.JPG")));
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0706.JPG")));
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0707.JPG")));
+        localAlbumManager.addPhoto(new PhotoMetaData(jpgPath.resolve("DSC_0708.JPG")));
+
+        SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(localAlbumManager);
+        String description = saleItemDescriptionBuilder.buildDescription(bricklinkInventory);
+        assertThat(description).isNotEmpty()
+                               .contains("Box flap shows repairs made with heavy card stock glued underneath. All original pieces like new. Includes box, instructions, and all original pieces.");
     }
 
     @Test
@@ -181,7 +256,7 @@ public class SaleItemDescriptionBuilderTest {
             albumManifest.setShortUrl(new URL(shortUrl));
             List<PhotoMetaData> photosList = albumManifest.getPhotos();
             IntStream.range(0, photos)
-                    .forEach(i -> photosList.add(new PhotoMetaData(Paths.get("./" + i + ".jpg"))));
+                     .forEach(i -> photosList.add(new PhotoMetaData(Paths.get("./" + i + ".jpg"))));
             return albumManifest;
         } catch (MalformedURLException e) {
             throw new BricklinkInventoryException(e);
@@ -198,7 +273,7 @@ public class SaleItemDescriptionBuilderTest {
     private AlbumManager mockAlbumManager(String uuid, String blItemNumber, AlbumManifest albumManifest) {
         AlbumManager albumManager = mock(AlbumManager.class);
         doReturn(albumManifest).when(albumManager)
-                .getAlbumManifest(eq(uuid), eq(blItemNumber));
+                               .getAlbumManifest(eq(uuid), eq(blItemNumber));
         return albumManager;
     }
 }

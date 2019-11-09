@@ -44,14 +44,16 @@ public class PriceCalculatorService {
     private final BricklinkSaleItemDao bricklinkSaleItemDao;
 
     public double calculatePrice(final BricklinkInventory bricklinkInventory) {
-        double price = 0.0d;
-        double[] newPrices = getNewPrices(bricklinkInventory.getBlItemId(), bricklinkInventory.getCompleteness());
-        double[] usedPrices = getUsedPrices(bricklinkInventory.getBlItemId(), bricklinkInventory.getCompleteness());
+        double price = Double.NaN;
+        if (!bricklinkInventory.getFixedPrice()) {
+            double[] newPrices = getNewPrices(bricklinkInventory.getBlItemId(), bricklinkInventory.getCompleteness());
+            double[] usedPrices = getUsedPrices(bricklinkInventory.getBlItemId(), bricklinkInventory.getCompleteness());
 
-        if ("N".equals(bricklinkInventory.getNewOrUsed())) {
-            price = calculatePrice(bricklinkInventory, newPrices);
-        } else {
-            price = calculatePrice(bricklinkInventory, usedPrices);
+            if ("N".equals(bricklinkInventory.getNewOrUsed())) {
+                price = calculatePrice(bricklinkInventory, newPrices);
+            } else {
+                price = calculatePrice(bricklinkInventory, usedPrices);
+            }
         }
         return (double)Math.round(price * 100)/100d;
     }

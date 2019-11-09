@@ -1,6 +1,7 @@
 package com.vattima.bricklink.inventory.service;
 
 import com.vattima.lego.imaging.model.AlbumManifest;
+import com.vattima.lego.imaging.model.PhotoMetaData;
 import com.vattima.lego.imaging.service.AlbumManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -22,6 +24,19 @@ public class SaleItemDescriptionBuilder {
     public String buildDescription(BricklinkInventory bricklinkInventory) {
         ConditionDecoder conditionDecoder = new ConditionDecoder();
         StringBuilder description = new StringBuilder();
+
+        // Album Manifest
+        AlbumManifest albumManifest = albumManager.getAlbumManifest(bricklinkInventory.getUuid(), bricklinkInventory.getBlItemNo());
+
+        // Get all remarks from all photos
+        Optional.ofNullable(
+                StringUtils.trimToNull(albumManifest.getPhotos()
+                                                    .stream()
+                                                    .map(p -> Optional.ofNullable(p.getKeyword("cp")))
+                                                    .filter(Optional::isPresent)
+                                                    .map(Optional::get)
+                                                    .collect(Collectors.joining(" "))))
+                .ifPresent(description::append);
 
         // Extra Description
         Optional.ofNullable(bricklinkInventory.getExtraDescription()).ifPresent(description::append);
@@ -41,8 +56,6 @@ public class SaleItemDescriptionBuilder {
             append(description, String.format("Instructions: %s", c));
         });
 
-        // Album Manifest
-        AlbumManifest albumManifest = albumManager.getAlbumManifest(bricklinkInventory.getUuid(), bricklinkInventory.getBlItemNo());
         if (hasShortUrl(albumManifest)) {
                 appendWithNewLine(description, shortUrlLinkBuilder(albumManifest));
         } else {
