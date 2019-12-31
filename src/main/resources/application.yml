@@ -22,7 +22,7 @@ logging:
       com.gargoylesoftware: ERROR
       com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter: OFF
       com.zaxxer: WARN
-      feign: DEBUG
+      feign: WARN
 
 bricklink:
    rest:
