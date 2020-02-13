@@ -1,7 +1,7 @@
 package com.vattima.bricklink.inventory.service;
 
+import com.vattima.bricklink.inventory.BricklinkInventoryException;
 import com.vattima.lego.imaging.model.AlbumManifest;
-import com.vattima.lego.imaging.model.PhotoMetaData;
 import com.vattima.lego.imaging.service.AlbumManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,27 +19,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SaleItemDescriptionBuilder {
     private static final String PHOTO_URL_PART = "[<a href=\"%s\" target=\"_blank\">(%d) Photos</a>]";
+    private static final String EXTENDED_DESCRIPTION_NOTE = "(See extended description)";
     private final AlbumManager albumManager;
 
     public String buildDescription(BricklinkInventory bricklinkInventory) {
         ConditionDecoder conditionDecoder = new ConditionDecoder();
         StringBuilder description = new StringBuilder();
+        StringBuilder extendedDescription = new StringBuilder();
 
         // Album Manifest
         AlbumManifest albumManifest = albumManager.getAlbumManifest(bricklinkInventory.getUuid(), bricklinkInventory.getBlItemNo());
-
-        // Get all remarks from all photos
-        Optional.ofNullable(
-                StringUtils.trimToNull(albumManifest.getPhotos()
-                                                    .stream()
-                                                    .map(p -> Optional.ofNullable(p.getKeyword("cp")))
-                                                    .filter(Optional::isPresent)
-                                                    .map(Optional::get)
-                                                    .collect(Collectors.joining(" "))))
-                .ifPresent(description::append);
-
-        // Extra Description
-        Optional.ofNullable(bricklinkInventory.getExtraDescription()).ifPresent(description::append);
 
         // Box
         conditionDecoder.decode(bricklinkInventory.getBoxConditionId()).ifPresent(c -> {
@@ -60,6 +49,33 @@ public class SaleItemDescriptionBuilder {
                 appendWithNewLine(description, shortUrlLinkBuilder(albumManifest));
         } else {
             appendWithNewLine(description, "Contact me for photos!");
+        }
+
+        // Get all remarks from all photos
+        Optional.ofNullable(
+                StringUtils.trimToNull(albumManifest.getPhotos()
+                                                    .stream()
+                                                    .map(p -> Optional.ofNullable(p.getKeyword("cp")))
+                                                    .filter(Optional::isPresent)
+                                                    .map(Optional::get)
+                                                    .collect(Collectors.joining(" "))))
+                .ifPresent(extendedDescription::append);
+
+        // Extra Description
+        Optional.ofNullable(bricklinkInventory.getExtraDescription()).ifPresent(extendedDescription::append);
+
+        // Bricklink only allows a Description length of 255. Put overflow into the Extra Description
+        if ((description.length() + 1 + extendedDescription.length()) > 255) {
+            if ((description.length() + 1 + EXTENDED_DESCRIPTION_NOTE.length()) > 255) {
+                String fullDescription = description.toString() + " " + EXTENDED_DESCRIPTION_NOTE;
+                throw new BricklinkInventoryException(String.format("Length [%d] of Description [%s] for bricklink item [%s]",description.length() + 1 + EXTENDED_DESCRIPTION_NOTE.length(), fullDescription, bricklinkInventory.getBlItemNo()));
+            } else {
+                description.append(" ").append(EXTENDED_DESCRIPTION_NOTE);
+                bricklinkInventory.setExtendedDescription(extendedDescription.toString());
+                log.info("Extended Description [{}]", extendedDescription.toString());
+            }
+        } else {
+            description.append(" ").append(extendedDescription);
         }
 
         log.info("Description [{}]", description.toString());
