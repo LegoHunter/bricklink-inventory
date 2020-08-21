@@ -175,6 +175,10 @@ public class BricklinkPriceCrawler {
         private PriceGuide priceGuide = new PriceGuide();
         private List<ItemForSale> itemsForSale = new ArrayList<>();
 
+        public void setItemsForSale(List<ItemForSale> itemsForSale) {
+            this.itemsForSale = Optional.ofNullable(itemsForSale).orElseThrow(() -> new RuntimeException(String.format("itemsForSale cannot be null - BricklinkInventory [%s]", bricklinkInventory)));
+        }
+
         BricklinkSaleItem buildBricklinkSaleItem(ItemForSale itemForSale) {
             BricklinkSaleItem bricklinkSaleItem = new BricklinkSaleItem();
             bricklinkSaleItem.setBlItemId(getBricklinkInventory().getBlItemId());
