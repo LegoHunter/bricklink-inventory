@@ -49,7 +49,7 @@ public class BricklinkPriceCrawler {
     }
 
     private Stream<BricklinkInventory> inventoryItems() {
-        return bricklinkInventoryDao.getInventoryWork(true)
+        return bricklinkInventoryDao.getInventoryWork()
                                     .parallelStream();
                                     //.filter(BricklinkInventory::shouldSynchronize);
     }
@@ -96,51 +96,57 @@ public class BricklinkPriceCrawler {
 //    }
 
     private List<InventoryWorkHolder> updateBricklinkSaleItems(Stream<BricklinkInventory> bricklinkInventoryStream) {
-        return bricklinkInventoryStream.filter(bli -> !Optional.ofNullable(bli.getOrderId()).isPresent())
+        return bricklinkInventoryStream.filter(bli -> !Optional.ofNullable(bli.getOrderId())
+                                                               .isPresent())
                                        .map(bli -> inventoryWorkHolders.apply(bli))
-                                       .flatMap(s -> s.parallel()
-                                                      .peek(iwh -> {
-                                                          if (iwh.getGuideType()
-                                                                 .equals("stock")) {
-                                                              CatalogItemsForSaleResult catalogNewItemsForSaleResult = bricklinkAjaxClient.catalogItemsForSale(
-                                                                      new ParamsBuilder()
-                                                                              .of("itemid", iwh
-                                                                                      .getBricklinkInventory()
-                                                                                      .getBlItemId())
-                                                                              .of("cond", iwh.getNewUsed())
-                                                                              .of("rpp", 500)
-                                                                              .get());
-                                                              iwh.setItemsForSale(catalogNewItemsForSaleResult.getList());
-                                                              iwh.getItemsForSale()
-                                                                 .forEach(ifs -> {
-                                                                     BricklinkSaleItem bricklinkSaleItem = iwh.buildBricklinkSaleItem(ifs);
-                                                                     try {
-                                                                         bricklinkSaleItemDao.upsert(bricklinkSaleItem);
-                                                                     } catch (Exception e) {
-                                                                         log.error("Could not upsert [" + bricklinkSaleItem + "]", e);
-                                                                         e.printStackTrace();
-                                                                     }
-                                                                 });
-                                                              bricklinkSaleItemDao.updateBricklinkSaleItemSold(iwh.getBricklinkInventory()
-                                                                                                                  .getBlItemId(), iwh.getNewUsed(), iwh.getCurrentlyForSaleInventoryIds());
-                                                              if (iwh.getCurrentlyForSaleInventoryIds()
-                                                                     .size() == 0) {
-                                                                  log.info("No items currently for sale for item [{}] new/Used [{}]", iwh.getBricklinkInventory()
-                                                                                                                                         .getBlItemNo(), iwh.getNewUsed());
-                                                              }
-                                                          }
-                                                          PriceGuide pg = bricklinkRestClient.getPriceGuide(iwh.getType(),
-                                                                  iwh.getBricklinkInventory()
-                                                                     .getBlItemNo(),
-                                                                  new ParamsBuilder()
-                                                                          .of("type", iwh.getType())
-                                                                          .of("guide_type", iwh.getGuideType())
-                                                                          .of("new_or_used", iwh.getNewUsed())
-                                                                          .get())
-                                                                                             .getData();
+                                       .flatMap(s -> s.peek(iwh -> {
+                                                   if (iwh.getGuideType()
+                                                          .equals("stock")) {
+                                                       synchronized (this) {
+                                                           try {
+                                                               Thread.sleep(1300);
+                                                               CatalogItemsForSaleResult catalogNewItemsForSaleResult = bricklinkAjaxClient.catalogItemsForSale(
+                                                                       new ParamsBuilder()
+                                                                               .of("itemid", iwh
+                                                                                       .getBricklinkInventory()
+                                                                                       .getBlItemId())
+                                                                               .of("cond", iwh.getNewUsed())
+                                                                               .of("rpp", 500)
+                                                                               .get());
+                                                               iwh.setItemsForSale(catalogNewItemsForSaleResult.getList());
+                                                               iwh.getItemsForSale()
+                                                                  .forEach(ifs -> {
+                                                                      BricklinkSaleItem bricklinkSaleItem = iwh.buildBricklinkSaleItem(ifs);
+                                                                      try {
+                                                                          bricklinkSaleItemDao.upsert(bricklinkSaleItem);
+                                                                      } catch (Exception e) {
+                                                                          log.error("Could not upsert [" + bricklinkSaleItem + "]", e);
+                                                                      }
+                                                                  });
+                                                               bricklinkSaleItemDao.updateBricklinkSaleItemSold(iwh.getBricklinkInventory()
+                                                                                                                   .getBlItemId(), iwh.getNewUsed(), iwh.getCurrentlyForSaleInventoryIds());
+                                                               if (iwh.getCurrentlyForSaleInventoryIds()
+                                                                      .size() == 0) {
+                                                                   log.info("No items currently for sale for item [{}] new/Used [{}]", iwh.getBricklinkInventory()
+                                                                                                                                          .getBlItemNo(), iwh.getNewUsed());
+                                                               }
+                                                           } catch (InterruptedException e) {
+                                                               e.printStackTrace();
+                                                           }
+                                                       }
+                                                   }
+                                                   PriceGuide pg = bricklinkRestClient.getPriceGuide(iwh.getType(),
+                                                           iwh.getBricklinkInventory()
+                                                              .getBlItemNo(),
+                                                           new ParamsBuilder()
+                                                                   .of("type", iwh.getType())
+                                                                   .of("guide_type", iwh.getGuideType())
+                                                                   .of("new_or_used", iwh.getNewUsed())
+                                                                   .get())
+                                                                                      .getData();
 
-                                                          iwh.setPriceGuide(pg);
-                                                      })
+                                                   iwh.setPriceGuide(pg);
+                                               })
                                        )
                                        .collect(Collectors.toList());
     }
@@ -192,6 +198,7 @@ public class BricklinkPriceCrawler {
             bricklinkSaleItem.setNewOrUsed(itemForSale.getCodeNew());
             bricklinkSaleItem.setQuantity(itemForSale.getN4Qty());
             bricklinkSaleItem.setUnitPrice(itemForSale.getSalePrice());
+            bricklinkSaleItem.setCountryCode((itemForSale.getStrSellerCountryCode()));
             return bricklinkSaleItem;
         }
 
@@ -216,5 +223,13 @@ public class BricklinkPriceCrawler {
         bricklinkSaleItem.setQuantity(itemForSale.getN4Qty());
         bricklinkSaleItem.setUnitPrice(itemForSale.getSalePrice());
         return bricklinkSaleItem;
+    }
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (Exception e) {
+
+        }
     }
 }
