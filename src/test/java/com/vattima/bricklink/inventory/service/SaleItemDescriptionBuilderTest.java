@@ -11,8 +11,8 @@ import com.vattima.lego.imaging.util.PathUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.bricklink.data.lego.dao.BricklinkInventoryDao;
 import net.bricklink.data.lego.dto.BricklinkInventory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 @Slf4j
-public class SaleItemDescriptionBuilderTest {
+class SaleItemDescriptionBuilderTest {
 
     private String uuid;
     private String blItemNumber;
@@ -38,7 +38,7 @@ public class SaleItemDescriptionBuilderTest {
     private AlbumManifest albumManifest;
     private LegoImagingProperties legoImagingProperties;
 
-    @Before
+    @BeforeEach
     public void setup() {
         uuid = "234851bc94cf3b875dfd91db73a76524";
         blItemNumber = "6658-1";
@@ -50,7 +50,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void photosWithRemarks_buildsDescriptionWithExtraDescriptions() throws Exception {
+    void photosWithRemarks_buildsDescriptionWithExtraDescriptions() throws Exception {
         Path jpgPath = PathUtils.fromClasspath("actual-lego-photos-with-keywords-and-remarks/6603-1-c93848ddb00ec2d6f20cfafd0eea46ef");
         legoImagingProperties.setRootImagesFolder(jpgPath.toFile()
                                                          .getAbsolutePath());
@@ -85,7 +85,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void photosWithSomeRemarks_buildsDescriptionWithExtraDescriptions() throws Exception {
+    void photosWithSomeRemarks_buildsDescriptionWithExtraDescriptions() throws Exception {
         Path jpgPath = PathUtils.fromClasspath("actual-lego-photos-with-keywords-and-some-remarks/6603-1-c93848ddb00ec2d6f20cfafd0eea46ef");
         legoImagingProperties.setRootImagesFolder(jpgPath.toFile()
                                                          .getAbsolutePath());
@@ -115,7 +115,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void buildDescription_returnsNonNull() {
+    void buildDescription_returnsNonNull() {
         albumManager = mockAlbumManager(uuid, blItemNumber, albumManifest);
 
         SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
@@ -129,7 +129,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void buildDescription_withBoxConditionCode_containsBoxDescription() {
+    void buildDescription_withBoxConditionCode_containsBoxDescription() {
         SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
@@ -145,7 +145,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void buildDescription_withSealedAndBoxConditionCode_containsBoxDescription() {
+    void buildDescription_withSealedAndBoxConditionCode_containsBoxDescription() {
         SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
@@ -159,7 +159,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void buildDescription_withExtraDescription() {
+    void buildDescription_withExtraDescription() {
         SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
@@ -176,7 +176,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void buildDescription_withInstructionsConditionCode_containsInstructionsDescription() {
+    void buildDescription_withInstructionsConditionCode_containsInstructionsDescription() {
         SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
@@ -200,7 +200,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void buildDescription_withNoPhotos_containsMessageToContactMe() {
+    void buildDescription_withNoPhotos_containsMessageToContactMe() {
         final String uuid = "455a2f76a89dcf372ac56fced641b5e5";
         final String blItemNumber = "6604-1";
         final AlbumManifest albumManifest = albumManifest(uuid, blItemNumber);
@@ -217,7 +217,7 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void buildDescription_withBoxAndInstructionsConditionCode_containsBoxAndInstructionsDescription() {
+    void buildDescription_withBoxAndInstructionsConditionCode_containsBoxAndInstructionsDescription() {
         SaleItemDescriptionBuilder saleItemDescriptionBuilder = new SaleItemDescriptionBuilder(albumManager);
 
         BricklinkInventory bricklinkInventory = new BricklinkInventory();
@@ -231,14 +231,14 @@ public class SaleItemDescriptionBuilderTest {
     }
 
     @Test
-    public void conditionDecoder_returnsCondition_forKnownValue() {
+    void conditionDecoder_returnsCondition_forKnownValue() {
         ConditionDecoder conditionDecoder = new ConditionDecoder();
         Optional<String> condition = conditionDecoder.decode(1);
         assertThat(condition).isPresent().get().isEqualTo("Mint");
     }
 
     @Test
-    public void conditionDecoder_returnsNotPresent_forUnknownValue() {
+    void conditionDecoder_returnsNotPresent_forUnknownValue() {
         ConditionDecoder conditionDecoder = new ConditionDecoder();
         Optional<String> condition = conditionDecoder.decode(99);
         assertThat(condition).isNotPresent();

@@ -4,7 +4,7 @@ import com.vattima.lego.inventory.pricing.PriceNotCalculableException;
 import lombok.extern.slf4j.Slf4j;
 import net.bricklink.data.lego.dto.BricklinkInventory;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -15,9 +15,9 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
-public class PriceCalculatorServiceTest {
+class PriceCalculatorServiceTest {
     @Test
-    public void calculatePrice() {
+    void calculatePrice() {
         PriceCalculatorService priceCalculatorService = new PriceCalculatorService(null);
 
         assertThatThrownBy(() -> {
@@ -58,7 +58,7 @@ public class PriceCalculatorServiceTest {
     }
 
     @Test
-    public void calculatePrice_usingService() {
+    void calculatePrice_usingService() {
         double[] prices = new double[]{5.67d, 9.45d, 15.23d, 11.50d, 28.34d, 36.15d, 88.01d, 17.71d, 15.92d, 29.51d};
         prices = Arrays.stream(prices).sorted().toArray();
         for (double d : prices) {
@@ -82,7 +82,7 @@ public class PriceCalculatorServiceTest {
     }
 
     @Test
-    public void getPriceAdjustment_variousCombinations() {
+    void getPriceAdjustment_variousCombinations() {
         PriceCalculatorService priceCalculatorService = new PriceCalculatorService(null);
         double priceAdjustment = priceCalculatorService.getPriceAdjustment(build("SL", "M"));
         assertThat(priceAdjustment).isEqualTo(1.25d);
