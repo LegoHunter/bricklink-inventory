@@ -10,6 +10,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,65 +47,167 @@ public class PriceCalculatorService {
     public double calculatePrice(final BricklinkInventory bricklinkInventory) {
         double price = Double.NaN;
         if (!bricklinkInventory.getFixedPrice()) {
-            double[] newPrices = getNewPrices(bricklinkInventory.getBlItemId(), bricklinkInventory.getCompleteness());
-            double[] usedPrices = getUsedPrices(bricklinkInventory.getBlItemId(), bricklinkInventory.getCompleteness());
+            List<BricklinkSaleItem> newPrices = getNewPrices(bricklinkInventory.getBlItemId(), bricklinkInventory.getCompleteness());
+            List<BricklinkSaleItem> usedPrices = getUsedPrices(bricklinkInventory.getBlItemId(), bricklinkInventory.getCompleteness());
 
             if ("N".equals(bricklinkInventory.getNewOrUsed())) {
-                price = calculatePrice(bricklinkInventory, newPrices);
+                price = calculatePriceForNew(bricklinkInventory, newPrices);
             } else {
-                price = calculatePrice(bricklinkInventory, usedPrices);
+                price = calculatePriceForUsed(bricklinkInventory, usedPrices);
             }
         }
-        return (double)Math.round(price * 100)/100d;
+        return (double) Math.round(price * 100) / 100d;
     }
 
-    public double[] getNewPrices(final Long blItemId, final String completeness) {
-        return getPrices(blItemId, "N", completeness);
+    public List<BricklinkSaleItem> getNewPrices(final Long blItemId, final String completeness) {
+        return getBrinklinkSaleItems(blItemId, "N", completeness);
     }
 
-    public double[] getUsedPrices(final Long blItemId, final String completeness) {
-        return getPrices(blItemId, "U", completeness);
+    public List<BricklinkSaleItem> getUsedPrices(final Long blItemId, final String completeness) {
+        return getBrinklinkSaleItems(blItemId, "U", completeness);
     }
 
     public double[] getPrices(final Long blItemId, final String newOrUsed, final String completeness) {
-        return bricklinkSaleItemDao.getPricesForItem(blItemId, newOrUsed, completeness)
+        return bricklinkSaleItemDao.getBrinklinkSaleItems(blItemId, newOrUsed, completeness)
                                    .stream()
-                                   .filter(bi -> bi.getStatus().equals("C"))
+                                   .filter(bi -> bi.getStatus()
+                                                   .equals("C"))
                                    .sorted(Comparator.comparing(BricklinkSaleItem::getUnitPrice))
                                    .mapToDouble(BricklinkSaleItem::getUnitPrice)
                                    .toArray();
     }
 
-    public double calculatePrice(final BricklinkInventory bricklinkInventory, double[] prices) {
+    public List<BricklinkSaleItem> getBrinklinkSaleItems(final Long blItemId, final String newOrUsed, final String completeness) {
+        return bricklinkSaleItemDao.getBrinklinkSaleItems(blItemId, newOrUsed, completeness)
+                                   .stream()
+                                   .filter(bi -> bi.getStatus()
+                                                   .equals("C"))
+                                   .sorted(Comparator.comparing(BricklinkSaleItem::getUnitPrice))
+                                   .collect(Collectors.toList());
+    }
+
+    public double calculatePriceForNew(final BricklinkInventory bricklinkInventory, List<BricklinkSaleItem> saleItems) {
         double price;
-        int pricesCount = prices.length;
-        if (pricesCount > 2) {
-            price = calculatePriceUsingMoreThanTwoPrices(bricklinkInventory, prices);
-        } else if (pricesCount > 1) {
-            price = calculatePriceUsingTwoPrices(bricklinkInventory, prices);
-        } else if (pricesCount > 0) {
-            price = calculatePriceUsingOnePrice(bricklinkInventory, prices);
+        if (saleItems.size() > 2) {
+            price = calculatePriceForNewSealedUsingMoreThanTwoPrices(bricklinkInventory, saleItems);
+        } else if (saleItems.size() > 1) {
+            price = calculatePriceUsingTwoPrices(bricklinkInventory, saleItems);
+        } else if (saleItems.size() > 0) {
+            price = calculatePriceUsingOnePrice(bricklinkInventory, saleItems);
         } else {
             throw new PriceNotCalculableException(bricklinkInventory, "There are no prices with which to calculate a price");
         }
         return adjustPrice(bricklinkInventory, price);
     }
 
-    private double calculatePriceUsingTwoPrices(final BricklinkInventory bricklinkInventory, double[] prices) {
+    public double calculatePriceForUsed(final BricklinkInventory bricklinkInventory, List<BricklinkSaleItem> saleItems) {
+        double price;
+        if (saleItems.size() > 2) {
+            price = calculatePriceUsingMoreThanTwoPrices(bricklinkInventory, saleItems);
+        } else if (saleItems.size() > 1) {
+            price = calculatePriceUsingTwoPrices(bricklinkInventory, saleItems);
+        } else if (saleItems.size() > 0) {
+            price = calculatePriceUsingOnePrice(bricklinkInventory, saleItems);
+        } else {
+            throw new PriceNotCalculableException(bricklinkInventory, "There are no prices with which to calculate a price");
+        }
+        return adjustPrice(bricklinkInventory, price);
+    }
+
+    public double calculatePrice(final BricklinkInventory bricklinkInventory, List<BricklinkSaleItem> saleItems) {
+        double price;
+        if (saleItems.size() > 2) {
+            price = calculatePriceUsingMoreThanTwoPrices(bricklinkInventory, saleItems);
+        } else if (saleItems.size() > 1) {
+            price = calculatePriceUsingTwoPrices(bricklinkInventory, saleItems);
+        } else if (saleItems.size() > 0) {
+            price = calculatePriceUsingOnePrice(bricklinkInventory, saleItems);
+        } else {
+            throw new PriceNotCalculableException(bricklinkInventory, "There are no prices with which to calculate a price");
+        }
+        return adjustPrice(bricklinkInventory, price);
+    }
+
+    double calculatePriceUsingTwoPrices(final BricklinkInventory bricklinkInventory, List<BricklinkSaleItem> saleItems) {
+        double[] prices = saleItems.stream()
+                                   .mapToDouble(BricklinkSaleItem::getUnitPrice)
+                                   .toArray();
         double lowPrice = prices[0];
         double highPrice = prices[1];
         return lowPrice + (highPrice - lowPrice) * 0.75d;
     }
 
-    private double calculatePriceUsingOnePrice(final BricklinkInventory bricklinkInventory, double[] prices) {
+    double calculatePriceUsingOnePrice(final BricklinkInventory bricklinkInventory, List<BricklinkSaleItem> saleItems) {
+        double[] prices = saleItems.stream()
+                                   .mapToDouble(BricklinkSaleItem::getUnitPrice)
+                                   .toArray();
         double price = prices[0];
-        return price * 0.85d;
+
+        double priceMinus3PercentUpTo10Dollars = price - Math.min(price * 0.03d, 10);
+        double priceMinusOneDollar = Math.max(price - 1.0d, 1.0d);
+        return Math.min(priceMinus3PercentUpTo10Dollars, priceMinusOneDollar);
     }
 
-    private double calculatePriceUsingMoreThanTwoPrices(final BricklinkInventory bricklinkInventory, double[] prices) {
+    private double calculatePriceForNewSealedUsingMoreThanTwoPrices(final BricklinkInventory bricklinkInventory, List<BricklinkSaleItem> saleItems) {
+        List<BricklinkSaleItem> usSaleItems =
+                saleItems.stream()
+                         .filter(bsi -> "US".equals(bsi.getCountryCode()))
+                         .filter(bsi -> "N".equals(bsi.getNewOrUsed()))
+                         .filter(bsi -> List.of("S", "C")
+                                            .contains(bsi.getCompleteness()))
+                         .collect(Collectors.toList());
+
+        List<BricklinkSaleItem> foreignSaleItems =
+                saleItems.stream()
+                         .filter(bsi -> !"US".equals(bsi.getCountryCode()))
+                         .filter(bsi -> "N".equals(bsi.getNewOrUsed()))
+                         .filter(bsi -> List.of("S", "C")
+                                            .contains(bsi.getCompleteness()))
+                         .collect(Collectors.toList());
+
+        if (usSaleItems.isEmpty()) {
+            log.info("Calculating price for {} among {} non US sets available", bricklinkInventory.getBlItemNo(),  foreignSaleItems.size());
+            double price;
+            if (foreignSaleItems.size() > 2) {
+                double[] prices = saleItems.stream()
+                                           .mapToDouble(BricklinkSaleItem::getUnitPrice)
+                                           .toArray();
+                DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics();
+                if ((prices[prices.length - 1] / prices[prices.length - 2]) > 3) {
+                    throw new PriceNotCalculableException(bricklinkInventory, "[" + bricklinkInventory.getNewOrUsed() + " " + bricklinkInventory.getCompleteness() + " " + bricklinkInventory.getBlItemNo() + " " + bricklinkInventory.getBlItemId() + "] Delta between last two prices is too high [" + prices[prices.length - 1] + "], [" + prices[prices.length - 2] + "]");
+                }
+                Arrays.stream(prices)
+                      .forEach(descriptiveStatistics::addValue);
+                double mean = descriptiveStatistics.getMean();
+                double standardDeviation = descriptiveStatistics.getStandardDeviation();
+                return mean + standardDeviation;
+            } else if (foreignSaleItems.size() > 1) {
+                price = calculatePriceUsingTwoPrices(bricklinkInventory, foreignSaleItems);
+            } else if (foreignSaleItems.size() > 0) {
+                price = calculatePriceUsingOnePrice(bricklinkInventory, foreignSaleItems);
+            } else {
+                throw new PriceNotCalculableException(bricklinkInventory, "There are no prices with which to calculate a price");
+            }
+            return adjustPrice(bricklinkInventory, price);
+
+        } else {
+            log.info("Calculating lowest price for {} based on {} US sets available", bricklinkInventory.getBlItemNo(),  usSaleItems.size());
+            List<BricklinkSaleItem> lowestPriceUsSaleItemListOfOne =
+                    usSaleItems.stream()
+                                    .min(Comparator.comparing(BricklinkSaleItem::getUnitPrice))
+                                    .map(bsi -> List.of(bsi))
+                                    .orElseThrow(NoSuchElementException::new);
+            return calculatePriceForNew(bricklinkInventory, lowestPriceUsSaleItemListOfOne);
+        }
+    }
+
+    private double calculatePriceUsingMoreThanTwoPrices(final BricklinkInventory bricklinkInventory, List<BricklinkSaleItem> saleItems) {
+        double[] prices = saleItems.stream()
+                                   .mapToDouble(BricklinkSaleItem::getUnitPrice)
+                                   .toArray();
         DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics();
         if ((prices[prices.length - 1] / prices[prices.length - 2]) > 3) {
-            throw new PriceNotCalculableException(bricklinkInventory, "["+bricklinkInventory.getNewOrUsed()+" "+bricklinkInventory.getCompleteness()+" "+bricklinkInventory.getBlItemNo()+" "+bricklinkInventory.getBlItemId()+"] Delta between last two prices is too high [" + prices[prices.length - 1] + "], [" + prices[prices.length - 2] + "]");
+            throw new PriceNotCalculableException(bricklinkInventory, "[" + bricklinkInventory.getNewOrUsed() + " " + bricklinkInventory.getCompleteness() + " " + bricklinkInventory.getBlItemNo() + " " + bricklinkInventory.getBlItemId() + "] Delta between last two prices is too high [" + prices[prices.length - 1] + "], [" + prices[prices.length - 2] + "]");
         }
         Arrays.stream(prices)
               .forEach(descriptiveStatistics::addValue);
