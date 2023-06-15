@@ -153,7 +153,7 @@ public class PriceCalculatorService {
                 saleItems.stream()
                          .filter(bsi -> "US".equals(bsi.getCountryCode()))
                          .filter(bsi -> "N".equals(bsi.getNewOrUsed()))
-                         .filter(bsi -> List.of("S", "C")
+                         .filter(bsi -> List.of("S", "C", "X")
                                             .contains(bsi.getCompleteness()))
                          .collect(Collectors.toList());
 
@@ -161,7 +161,7 @@ public class PriceCalculatorService {
                 saleItems.stream()
                          .filter(bsi -> !"US".equals(bsi.getCountryCode()))
                          .filter(bsi -> "N".equals(bsi.getNewOrUsed()))
-                         .filter(bsi -> List.of("S", "C")
+                         .filter(bsi -> List.of("S", "C", "X")
                                             .contains(bsi.getCompleteness()))
                          .collect(Collectors.toList());
 

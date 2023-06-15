@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -190,7 +191,7 @@ public class BricklinkPriceCrawler {
             bricklinkSaleItem.setBlItemId(getBricklinkInventory().getBlItemId());
             bricklinkSaleItem.setInventoryId(itemForSale.getIdInv());
             bricklinkSaleItem.setCompleteness(itemForSale.getCodeComplete());
-            bricklinkSaleItem.setDateCreated(Instant.now());
+            bricklinkSaleItem.setDateCreated(ZonedDateTime.now());
             bricklinkSaleItem.setDescription(StringUtils.trim(Optional.ofNullable(itemForSale.getStrDesc())
                                                                       .map(d -> d.replaceAll("[^\\x00-\\x7F]", ""))
                                                                       .orElse("")));
@@ -214,7 +215,7 @@ public class BricklinkPriceCrawler {
         bricklinkSaleItem.setBlItemId(blItemid);
         bricklinkSaleItem.setInventoryId(itemForSale.getIdInv());
         bricklinkSaleItem.setCompleteness(itemForSale.getCodeComplete());
-        bricklinkSaleItem.setDateCreated(Instant.now());
+        bricklinkSaleItem.setDateCreated(ZonedDateTime.now());
         bricklinkSaleItem.setDescription(StringUtils.trim(Optional.ofNullable(itemForSale.getStrDesc())
                                                                   .map(d -> d.replaceAll("[^\\x00-\\x7F]", ""))
                                                                   .orElse("")));

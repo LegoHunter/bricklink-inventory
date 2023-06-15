@@ -43,17 +43,17 @@ public class InventoryServiceImpl implements InventoryService {
                 }
             } else {
                 // If inventory_id is null, bricklinkInventory does not exist in Bricklink
-                throw new RuntimeException(String.format("ABOUT TO INSERT NEW INVENTORY [%s]", bricklinkInventory));
-//                Inventory inventory = new Inventory();
-//                InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
-//                BricklinkResource<Inventory> inventoryResponse = bricklinkRestClient.createInventory(inventory);
-//                result = SynchronizeResult.build(inventoryResponse);
-//                if (result.isSuccess()) {
-//                    inventory = result.getInventory();
-//                    InventoryMapper.mapInventoryToBricklinkInventory.accept(inventory, bricklinkInventory);
-//                    bricklinkInventoryDao.update(bricklinkInventory);
-//                    bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
-//                }
+//                throw new RuntimeException(String.format("ABOUT TO INSERT NEW INVENTORY [%s]", bricklinkInventory));
+                Inventory inventory = new Inventory();
+                InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
+                BricklinkResource<Inventory> inventoryResponse = bricklinkRestClient.createInventory(inventory);
+                result = SynchronizeResult.build(inventoryResponse);
+                if (result.isSuccess()) {
+                    inventory = result.getInventory();
+                    InventoryMapper.mapInventoryToBricklinkInventory.accept(inventory, bricklinkInventory);
+                    bricklinkInventoryDao.update(bricklinkInventory);
+                    bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
+                }
             }
         } else {
             log.info("Synchronization not needed");
