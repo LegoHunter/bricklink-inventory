@@ -32,7 +32,7 @@ public class SaleItemDescriptionBuilder {
 
         // Box
         conditionDecoder.decode(bricklinkInventory.getBoxConditionId()).ifPresent(c -> {
-            append(description, String.format("Box: %s", c));
+            append(description, "Box: %s".formatted(c));
         });
 
         // Sealed
@@ -42,7 +42,7 @@ public class SaleItemDescriptionBuilder {
 
         // Instructions
         conditionDecoder.decode(bricklinkInventory.getInstructionsConditionId()).ifPresent(c -> {
-            append(description, String.format("Instructions: %s", c));
+            append(description, "Instructions: %s".formatted(c));
         });
 
         if (hasShortUrl(albumManifest)) {
@@ -68,7 +68,7 @@ public class SaleItemDescriptionBuilder {
         if ((description.length() + 1 + extendedDescription.length()) > 255) {
             if ((description.length() + 1 + EXTENDED_DESCRIPTION_NOTE.length()) > 255) {
                 String fullDescription = description.toString() + " " + EXTENDED_DESCRIPTION_NOTE;
-                throw new BricklinkInventoryException(String.format("Length [%d] of Description [%s] for bricklink item [%s]",description.length() + 1 + EXTENDED_DESCRIPTION_NOTE.length(), fullDescription, bricklinkInventory.getBlItemNo()));
+                throw new BricklinkInventoryException("Length [%d] of Description [%s] for bricklink item [%s]".formatted(description.length() + 1 + EXTENDED_DESCRIPTION_NOTE.length(), fullDescription, bricklinkInventory.getBlItemNo()));
             } else {
                 description.append(" ").append(EXTENDED_DESCRIPTION_NOTE);
                 bricklinkInventory.setExtendedDescription(extendedDescription.toString());
@@ -88,7 +88,7 @@ public class SaleItemDescriptionBuilder {
     }
 
     public String shortUrlLinkBuilder(final AlbumManifest albumManifest) {
-        return String.format(PHOTO_URL_PART, albumManifest.getShortUrl().toExternalForm(), albumManifest.getPhotos().size());
+        return PHOTO_URL_PART.formatted(albumManifest.getShortUrl().toExternalForm(), albumManifest.getPhotos().size());
     }
 
     private StringBuilder append(StringBuilder stringBuilder, String s) {

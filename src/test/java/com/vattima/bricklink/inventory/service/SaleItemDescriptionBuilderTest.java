@@ -39,7 +39,7 @@ class SaleItemDescriptionBuilderTest {
     private LegoImagingProperties legoImagingProperties;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         uuid = "234851bc94cf3b875dfd91db73a76524";
         blItemNumber = "6658-1";
         shortUrl = "http://bit.ly/2EdZ3z6";

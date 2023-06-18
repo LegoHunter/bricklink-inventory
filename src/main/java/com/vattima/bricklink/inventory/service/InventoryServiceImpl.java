@@ -67,7 +67,7 @@ public class InventoryServiceImpl implements InventoryService {
         BricklinkResource<Order> bricklinkOrder = bricklinkRestClient.getOrder(orderId);
 
         // If not found, throw Exception
-        Order order = Optional.ofNullable(bricklinkOrder.getData()).orElseThrow(() -> new BricklinkInventoryException(String.format("Order Id [%1$s] was not found", orderId)));
+        Order order = Optional.ofNullable(bricklinkOrder.getData()).orElseThrow(() -> new BricklinkInventoryException("Order Id [%1$s] was not found".formatted(orderId)));
 
         // Get all OrderItem Batches
         BricklinkResource<List<List<OrderItem>>> orderItemBatches = bricklinkRestClient.getOrderItems(orderId);

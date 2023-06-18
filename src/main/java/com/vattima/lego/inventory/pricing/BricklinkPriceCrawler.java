@@ -97,8 +97,7 @@ public class BricklinkPriceCrawler {
 //    }
 
     private List<InventoryWorkHolder> updateBricklinkSaleItems(Stream<BricklinkInventory> bricklinkInventoryStream) {
-        return bricklinkInventoryStream.filter(bli -> !Optional.ofNullable(bli.getOrderId())
-                                                               .isPresent())
+        return bricklinkInventoryStream.filter(bli -> Optional.ofNullable(bli.getOrderId()).isEmpty())
                                        .map(bli -> inventoryWorkHolders.apply(bli))
                                        .flatMap(s -> s.peek(iwh -> {
                                                    if (iwh.getGuideType()
@@ -183,7 +182,7 @@ public class BricklinkPriceCrawler {
         private List<ItemForSale> itemsForSale = new ArrayList<>();
 
         public void setItemsForSale(List<ItemForSale> itemsForSale) {
-            this.itemsForSale = Optional.ofNullable(itemsForSale).orElseThrow(() -> new RuntimeException(String.format("itemsForSale cannot be null - BricklinkInventory [%s]", bricklinkInventory)));
+            this.itemsForSale = Optional.ofNullable(itemsForSale).orElseThrow(() -> new RuntimeException("itemsForSale cannot be null - BricklinkInventory [%s]".formatted(bricklinkInventory)));
         }
 
         BricklinkSaleItem buildBricklinkSaleItem(ItemForSale itemForSale) {
