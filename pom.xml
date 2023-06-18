@@ -20,7 +20,7 @@
 		<dbunit.version>2.6.0</dbunit.version>
 		<htmlunit.version>2.47.1</htmlunit.version>
 		<httpclient.version>4.5.13</httpclient.version>
-		<lombok.version>1.18.18</lombok.version>
+		<lombok.version>1.18.28</lombok.version>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<mybatis-spring-boot-starter.version>2.1.4</mybatis-spring-boot-starter.version>
 	</properties>
