@@ -1,124 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.3</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.vattima.bricklink</groupId>
-	<artifactId>bricklink-inventory</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>Bricklink :: Inventory Synchronizer</name>
-	<description>Bricklink Inventory Management</description>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.7.12</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+  <groupId>com.vattima.bricklink</groupId>
+  <artifactId>bricklink-inventory</artifactId>
+  <version>1.1.0-SNAPSHOT</version>
+  <name>Bricklink :: Inventory</name>
+  <description>Bricklink Inventory Management</description>
 
-	<properties>
-		<java.version>11</java.version>
-		<openfeign.version>10.12</openfeign.version>
-		<dbunit.version>2.6.0</dbunit.version>
-		<htmlunit.version>2.47.1</htmlunit.version>
-		<httpclient.version>4.5.13</httpclient.version>
-		<lombok.version>1.18.28</lombok.version>
-		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-		<mybatis-spring-boot-starter.version>2.1.4</mybatis-spring-boot-starter.version>
-	</properties>
+  <properties>
+    <java.version>17</java.version>
+    <bricklink-rest.version>1.1.0-SNAPSHOT</bricklink-rest.version>
+    <bricklink-data.version>1.1.0-SNAPSHOT</bricklink-data.version>
+    <bricklink-ajax.version>1.1.0-SNAPSHOT</bricklink-ajax.version>
+    <lego-imaging.version>1.1.0-SNAPSHOT</lego-imaging.version>
+    <lombok.version>1.18.28</lombok.version>
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <mybatis-spring-boot-starter.version>2.1.4</mybatis-spring-boot-starter.version>
+  </properties>
 
-	<dependencies>
+  <dependencies>
 
-		<dependency>
-			<groupId>com.bricklink.api</groupId>
-			<artifactId>bricklink-rest</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
+    <dependency>
+      <groupId>com.bricklink.api</groupId>
+      <artifactId>bricklink-rest</artifactId>
+      <version>${bricklink-rest.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>com.bricklink.api</groupId>
-			<artifactId>bricklink-ajax</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
+    <dependency>
+      <groupId>com.bricklink.data</groupId>
+      <artifactId>bricklink-data</artifactId>
+      <version>${bricklink-data.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>com.bricklink.data</groupId>
-			<artifactId>bricklink-data</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
+    <dependency>
+      <groupId>com.bricklink.api</groupId>
+      <artifactId>bricklink-ajax</artifactId>
+      <version>${bricklink-ajax.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>com.vattima.lego</groupId>
-			<artifactId>lego-imaging</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+    <dependency>
+      <groupId>com.vattima.lego</groupId>
+      <artifactId>lego-imaging</artifactId>
+      <version>${lego-imaging.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>com.bricklink.api</groupId>
-			<artifactId>bricklink-html</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
+    <dependency>
+      <groupId>io.vavr</groupId>
+      <artifactId>vavr</artifactId>
+      <version>0.10.2</version>
+    </dependency>
 
-		<dependency>
-			<groupId>io.vavr</groupId>
-			<artifactId>vavr</artifactId>
-			<version>0.10.2</version>
-		</dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>3.6.1</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math3</artifactId>
-			<version>3.6.1</version>
-		</dependency>
+    <dependency>
+      <groupId>org.mybatis.spring.boot</groupId>
+      <artifactId>mybatis-spring-boot-starter</artifactId>
+      <version>${mybatis-spring-boot-starter.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.mybatis.spring.boot</groupId>
-			<artifactId>mybatis-spring-boot-starter</artifactId>
-			<version>${mybatis-spring-boot-starter.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
-		</dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
-		</dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <optional>true</optional>
+    </dependency>
 
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-	<build>
-		<resources>
-			<resource>
-				<directory>/src/test/resources</directory>
-				<includes>
-					<include>**/*.*</include>
-				</includes>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+  <build>
+    <resources>
+      <resource>
+        <directory>/src/test/resources</directory>
+        <includes>
+          <include>**/*.*</include>
+        </includes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <release>${java.version}</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.openrewrite.maven</groupId>
+        <artifactId>rewrite-maven-plugin</artifactId>
+        <version>4.46.0</version>
+        <configuration>
+          <activeRecipes>
+            <recipe>org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7</recipe>
+            <recipe>org.openrewrite.java.migrate.UpgradeToJava17</recipe>
+            <recipe>org.openrewrite.java.spring.boot2.SpringBoot2JUnit4to5Migration</recipe>
+          </activeRecipes>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.openrewrite.recipe</groupId>
+            <artifactId>rewrite-spring</artifactId>
+            <version>4.36.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
 </project>
