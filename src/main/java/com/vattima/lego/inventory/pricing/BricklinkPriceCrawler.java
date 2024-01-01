@@ -18,7 +18,6 @@ import net.bricklink.data.lego.dto.BricklinkSaleItem;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,35 +102,30 @@ public class BricklinkPriceCrawler {
                                                    if (iwh.getGuideType()
                                                           .equals("stock")) {
                                                        synchronized (this) {
-                                                           try {
-                                                               Thread.sleep(1300);
-                                                               CatalogItemsForSaleResult catalogNewItemsForSaleResult = bricklinkAjaxClient.catalogItemsForSale(
-                                                                       new ParamsBuilder()
-                                                                               .of("itemid", iwh
-                                                                                       .getBricklinkInventory()
-                                                                                       .getBlItemId())
-                                                                               .of("cond", iwh.getNewUsed())
-                                                                               .of("rpp", 500)
-                                                                               .get());
-                                                               iwh.setItemsForSale(catalogNewItemsForSaleResult.getList());
-                                                               iwh.getItemsForSale()
-                                                                  .forEach(ifs -> {
-                                                                      BricklinkSaleItem bricklinkSaleItem = iwh.buildBricklinkSaleItem(ifs);
-                                                                      try {
-                                                                          bricklinkSaleItemDao.upsert(bricklinkSaleItem);
-                                                                      } catch (Exception e) {
-                                                                          log.error("Could not upsert [" + bricklinkSaleItem + "]", e);
-                                                                      }
-                                                                  });
-                                                               bricklinkSaleItemDao.updateBricklinkSaleItemSold(iwh.getBricklinkInventory()
-                                                                                                                   .getBlItemId(), iwh.getNewUsed(), iwh.getCurrentlyForSaleInventoryIds());
-                                                               if (iwh.getCurrentlyForSaleInventoryIds()
-                                                                      .size() == 0) {
-                                                                   log.info("No items currently for sale for item [{}] new/Used [{}]", iwh.getBricklinkInventory()
-                                                                                                                                          .getBlItemNo(), iwh.getNewUsed());
-                                                               }
-                                                           } catch (InterruptedException e) {
-                                                               e.printStackTrace();
+                                                           CatalogItemsForSaleResult catalogNewItemsForSaleResult = bricklinkAjaxClient.catalogItemsForSale(
+                                                                   new ParamsBuilder()
+                                                                           .of("itemid", iwh
+                                                                                   .getBricklinkInventory()
+                                                                                   .getBlItemId())
+                                                                           .of("cond", iwh.getNewUsed())
+                                                                           .of("rpp", 500)
+                                                                           .get());
+                                                           iwh.setItemsForSale(catalogNewItemsForSaleResult.getList());
+                                                           iwh.getItemsForSale()
+                                                              .forEach(ifs -> {
+                                                                  BricklinkSaleItem bricklinkSaleItem = iwh.buildBricklinkSaleItem(ifs);
+                                                                  try {
+                                                                      bricklinkSaleItemDao.upsert(bricklinkSaleItem);
+                                                                  } catch (Exception e) {
+                                                                      log.error("Could not upsert [" + bricklinkSaleItem + "]", e);
+                                                                  }
+                                                              });
+                                                           bricklinkSaleItemDao.updateBricklinkSaleItemSold(iwh.getBricklinkInventory()
+                                                                                                               .getBlItemId(), iwh.getNewUsed(), iwh.getCurrentlyForSaleInventoryIds());
+                                                           if (iwh.getCurrentlyForSaleInventoryIds()
+                                                                  .size() == 0) {
+                                                               log.info("No items currently for sale for item [{}] new/Used [{}]", iwh.getBricklinkInventory()
+                                                                                                                                      .getBlItemNo(), iwh.getNewUsed());
                                                            }
                                                        }
                                                    }

@@ -56,8 +56,7 @@ public class SaleItemDescriptionBuilder {
                 StringUtils.trimToNull(albumManifest.getPhotos()
                                                     .stream()
                                                     .map(p -> Optional.ofNullable(p.getKeyword("cp")))
-                                                    .filter(Optional::isPresent)
-                                                    .map(Optional::get)
+                                                    .flatMap(Optional::stream)
                                                     .collect(Collectors.joining(" "))))
                 .ifPresent(extendedDescription::append);
 
