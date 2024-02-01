@@ -43,17 +43,17 @@ public class InventoryServiceImpl implements InventoryService {
                 }
             } else {
                 // If inventory_id is null, bricklinkInventory does not exist in Bricklink
-//                throw new RuntimeException(String.format("ABOUT TO INSERT NEW INVENTORY [%s]", bricklinkInventory));
-                Inventory inventory = new Inventory();
-                InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
-                BricklinkResource<Inventory> inventoryResponse = bricklinkRestClient.createInventory(inventory);
-                result = SynchronizeResult.build(inventoryResponse);
-                if (result.isSuccess()) {
-                    inventory = result.getInventory();
-                    InventoryMapper.mapInventoryToBricklinkInventory.accept(inventory, bricklinkInventory);
-                    bricklinkInventoryDao.update(bricklinkInventory);
-                    bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
-                }
+                throw new RuntimeException(String.format("ABOUT TO INSERT NEW INVENTORY [%s]", bricklinkInventory));
+//                Inventory inventory = new Inventory();
+//                InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
+//                BricklinkResource<Inventory> inventoryResponse = bricklinkRestClient.createInventory(inventory);
+//                result = SynchronizeResult.build(inventoryResponse);
+//                if (result.isSuccess()) {
+//                    inventory = result.getInventory();
+//                    InventoryMapper.mapInventoryToBricklinkInventory.accept(inventory, bricklinkInventory);
+//                    bricklinkInventoryDao.update(bricklinkInventory);
+//                    bricklinkInventoryDao.setSynchronizedNow(bricklinkInventory.getBlInventoryId());
+//                }
             }
         } else {
             log.info("Synchronization not needed");
@@ -80,15 +80,18 @@ public class InventoryServiceImpl implements InventoryService {
                 Optional<BricklinkInventory> bricklinkInventory = null;
                 try {
                     bricklinkInventory = bricklinkInventoryDao.getByInventoryId(oi.getInventory_id());
+                    if (bricklinkInventory.isEmpty()) {
+                        throw new IllegalStateException(String.format("Bricklink Inventory Id [%d] was not found.", oi.getInventory_id()));
+                    }
+                    bricklinkInventory.ifPresent(bi -> {
+                        // update database Bricklink Inventory item with the order id
+                        bricklinkInventoryDao.updateOrder(bi.getBlInventoryId(), orderId);
+                        // log the update
+                        log.info("Updated BricklinkInventory [{}] with Order Id [{}]", bi, orderId);
+                    });
                 } catch (Exception e) {
                     throw new BricklinkInventoryException(e);
                 }
-                bricklinkInventory.ifPresent(bi -> {
-                    // update database Bricklink Inventory item with the order id
-                    bricklinkInventoryDao.updateOrder(bi.getBlInventoryId(), orderId);
-                    // log the update
-                    log.info("Updated BricklinkInventory [{}] with Order Id [{}]", bi, orderId);
-                });
             });
         });
     }
