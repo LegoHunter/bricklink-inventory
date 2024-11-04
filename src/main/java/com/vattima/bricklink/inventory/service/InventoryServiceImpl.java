@@ -43,7 +43,7 @@ public class InventoryServiceImpl implements InventoryService {
                 }
             } else {
                 // If inventory_id is null, bricklinkInventory does not exist in Bricklink
-                throw new RuntimeException(String.format("ABOUT TO INSERT NEW INVENTORY [%s]", bricklinkInventory));
+                throw new RuntimeException("ABOUT TO INSERT NEW INVENTORY [%s]".formatted(bricklinkInventory));
 //                Inventory inventory = new Inventory();
 //                InventoryMapper.mapBricklinkInventoryToInventory.accept(bricklinkInventory, inventory);
 //                BricklinkResource<Inventory> inventoryResponse = bricklinkRestClient.createInventory(inventory);
@@ -81,7 +81,7 @@ public class InventoryServiceImpl implements InventoryService {
                 try {
                     bricklinkInventory = bricklinkInventoryDao.getByInventoryId(oi.getInventory_id());
                     if (bricklinkInventory.isEmpty()) {
-                        throw new IllegalStateException(String.format("Bricklink Inventory Id [%d] was not found.", oi.getInventory_id()));
+                        throw new IllegalStateException("Bricklink Inventory Id [%d] was not found.".formatted(oi.getInventory_id()));
                     }
                     bricklinkInventory.ifPresent(bi -> {
                         // update database Bricklink Inventory item with the order id
