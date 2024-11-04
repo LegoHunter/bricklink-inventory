@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -256,7 +255,7 @@ class SaleItemDescriptionBuilderTest {
             albumManifest.setShortUrl(new URL(shortUrl));
             List<PhotoMetaData> photosList = albumManifest.getPhotos();
             IntStream.range(0, photos)
-                     .forEach(i -> photosList.add(new PhotoMetaData(Paths.get("./" + i + ".jpg"))));
+                     .forEach(i -> photosList.add(new PhotoMetaData(Path.of("./" + i + ".jpg"))));
             return albumManifest;
         } catch (MalformedURLException e) {
             throw new BricklinkInventoryException(e);

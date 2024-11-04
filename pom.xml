@@ -5,25 +5,49 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.1</version>
+    <version>3.3.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>com.vattima.bricklink</groupId>
   <artifactId>bricklink-inventory</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>1.3.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
   <name>Bricklink :: Inventory</name>
   <description>Bricklink Inventory Management</description>
 
   <properties>
-    <java.version>17</java.version>
-    <bricklink-rest.version>1.2.0-SNAPSHOT</bricklink-rest.version>
-    <bricklink-data.version>1.2.1-SNAPSHOT</bricklink-data.version>
-    <bricklink-ajax.version>1.2.0-SNAPSHOT</bricklink-ajax.version>
-    <lego-imaging.version>1.2.0-SNAPSHOT</lego-imaging.version>
-    <lombok.version>1.18.30</lombok.version>
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <java.version>22</java.version>
+    <bricklink-rest.version>1.3.0-SNAPSHOT</bricklink-rest.version>
+    <bricklink-data.version>1.3.0-SNAPSHOT</bricklink-data.version>
+    <bricklink-ajax.version>1.3.0-SNAPSHOT</bricklink-ajax.version>
+    <lego-imaging.version>1.3.0-SNAPSHOT</lego-imaging.version>
+    <lombok.version>1.18.34</lombok.version>
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     <mybatis-spring-boot-starter.version>3.0.3</mybatis-spring-boot-starter.version>
+    <github.organization>LegoHunter</github.organization>
   </properties>
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/${github.organization}/${project.artifactId}</url>
+    </repository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>central</id>
+      <url>https://repo1.maven.org/maven2</url>
+    </repository>
+    <repository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/${github.organization}/*</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 
   <dependencies>
 
@@ -89,7 +113,6 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
       <optional>true</optional>
     </dependency>
 
@@ -113,7 +136,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <release>${java.version}</release>
         </configuration>
@@ -121,19 +143,21 @@
       <plugin>
         <groupId>org.openrewrite.maven</groupId>
         <artifactId>rewrite-maven-plugin</artifactId>
-        <version>5.17.1</version>
+        <version>5.43.0</version>
         <configuration>
           <activeRecipes>
             <recipe>org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_0</recipe>
             <recipe>org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_1</recipe>
             <recipe>org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_2</recipe>
+            <recipe>org.openrewrite.java.spring.boot3.SpringBootProperties_3_3</recipe>
+            <recipe>org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3</recipe>
           </activeRecipes>
         </configuration>
         <dependencies>
           <dependency>
             <groupId>org.openrewrite.recipe</groupId>
             <artifactId>rewrite-spring</artifactId>
-            <version>5.1.7</version>
+            <version>5.22.0</version>
           </dependency>
         </dependencies>
       </plugin>
