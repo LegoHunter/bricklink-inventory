@@ -17,10 +17,10 @@
 
   <properties>
     <java.version>22</java.version>
-    <bricklink-rest.version>1.3.0-SNAPSHOT</bricklink-rest.version>
-    <bricklink-data.version>1.3.0-SNAPSHOT</bricklink-data.version>
-    <bricklink-ajax.version>1.3.0-SNAPSHOT</bricklink-ajax.version>
-    <lego-imaging.version>1.3.0-SNAPSHOT</lego-imaging.version>
+    <bricklink-rest.version>1.2.0-SNAPSHOT</bricklink-rest.version>
+    <bricklink-data.version>1.2.1-SNAPSHOT</bricklink-data.version>
+    <bricklink-ajax.version>1.2.0-SNAPSHOT</bricklink-ajax.version>
+    <lego-imaging.version>1.2.0-SNAPSHOT</lego-imaging.version>
     <lombok.version>1.18.34</lombok.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     <mybatis-spring-boot-starter.version>3.0.3</mybatis-spring-boot-starter.version>
