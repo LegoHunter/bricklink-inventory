@@ -1,6 +1,6 @@
-package com.vattima.lego.imaging.test;
+package io.legohunter.imaging.test;
 
-import com.vattima.lego.imaging.LegoImagingException;
+import io.legohunter.imaging.LegoImagingException;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,13 +1,13 @@
 package com.vattima.bricklink.inventory.service;
 
 import com.vattima.bricklink.inventory.BricklinkInventoryException;
-import com.vattima.lego.imaging.config.LegoImagingProperties;
-import com.vattima.lego.imaging.model.AlbumManifest;
-import com.vattima.lego.imaging.model.PhotoMetaData;
-import com.vattima.lego.imaging.service.AlbumManager;
-import com.vattima.lego.imaging.service.flickr.AlbumManagerImpl;
-import com.vattima.lego.imaging.service.flickr.ImageManagerImpl;
-import com.vattima.lego.imaging.util.PathUtils;
+import io.legohunter.imaging.config.LegoImagingProperties;
+import io.legohunter.imaging.model.AlbumManifest;
+import io.legohunter.imaging.model.PhotoMetaData;
+import io.legohunter.imaging.service.AlbumManager;
+import io.legohunter.imaging.service.flickr.AlbumManagerImpl;
+import io.legohunter.imaging.service.flickr.ImageManagerImpl;
+import io.legohunter.imaging.util.PathUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.bricklink.data.lego.dao.BricklinkInventoryDao;
 import net.bricklink.data.lego.dto.BricklinkInventory;
